@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.WebJobs.Host;
 using Newtonsoft.Json;
 using JPDictBackend.Helper;
+using System;
 
 namespace JPDictBackend
 {
@@ -17,15 +18,24 @@ namespace JPDictBackend
         {
             log.Info("C# HTTP trigger function processed a request.");
 
-            string date = req.Query["date"];
+            string index = req.Query["index"];
 
             string requestBody = new StreamReader(req.Body).ReadToEnd();
             dynamic data = JsonConvert.DeserializeObject(requestBody);
-            date = date ?? data?.date;
+            index = index ?? data?.index;
+            if(index==null)
+            {
+                return new BadRequestObjectResult("Please pass required parameters on the query string or in the request body"); 
+            }
+            if(int.TryParse(index,out int i))
+            {
+                return (ActionResult)new OkObjectResult(DailySentenceHelper.GetJson(DateTime.UtcNow.AddHours(8).AddDays(i - 2).ToString("yyyyMMdd")));
+            }
+            else
+            {
+                return new BadRequestObjectResult("index should be an integer");
+            }
 
-            return date != null
-                ? (ActionResult)new OkObjectResult(DailySentenceHelper.GetJson(date))
-                : new BadRequestObjectResult("Please pass required parameters on the query string or in the request body");
         }
     }
 }

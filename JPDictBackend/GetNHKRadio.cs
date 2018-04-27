@@ -18,11 +18,22 @@ namespace JPDictBackend
             log.Info("C# HTTP trigger function processed a request.");
 
             string speed = req.Query["speed"];
-            string index = req.Query["index"];            
+            string index = req.Query["index"];
+            string getItemsCount = req.Query["getItemsCount"];
             string requestBody = new StreamReader(req.Body).ReadToEnd();
             dynamic data = JsonConvert.DeserializeObject(requestBody);
             speed = speed ?? data?.speed;
             index = index ?? data?.index;
+            getItemsCount = getItemsCount ?? data?.getItemsCount;
+            if(getItemsCount!=null)
+            {
+                if (bool.TryParse(getItemsCount, out bool g))
+                {
+                    if (g)
+                        return new OkObjectResult(NHKRadioHelper.GetItemsCount());
+                }
+            }
+            
             if (speed != "normal" && speed != "slow" && speed != "fast")
             {
                 return new BadRequestObjectResult("Please specify a speed (normal, slow or fast)");
