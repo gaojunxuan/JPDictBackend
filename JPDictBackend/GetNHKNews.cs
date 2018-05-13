@@ -7,16 +7,17 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.WebJobs.Host;
 using Newtonsoft.Json;
 using JPDictBackend.Helper;
+using System.Threading.Tasks;
 
 namespace JPDictBackend
 {
     public static class GetNHKNews
     {
         [FunctionName("GetNHKNews")]
-        public static IActionResult Run([HttpTrigger(AuthorizationLevel.Function, "get", Route = null)]HttpRequest req, TraceWriter log)
+        public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "get", Route = null)]HttpRequest req, TraceWriter log)
         {
             log.Info("C# HTTP trigger function processed a request.");
-            return new OkObjectResult(NHKNewsHelper.GetXmlData());
+            return new OkObjectResult(await NHKNewsHelper.GetXmlData());
         }
     }
 }

@@ -4,18 +4,19 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace JPDictBackend.Helper
 {
     public static class NHKRadioHelper
     {
         const string URL = "http://www.nhk.or.jp/r-news/newslist.js";
-        public static NHKRadioResult GetJson(string speed, string index)
+        public static async Task<NHKRadioResult> GetJson(string speed, string index)
         {
             bool cast = int.TryParse(index, out int i);
             if (!cast)
                 i = 0;            
-            var httpres = HttpHelper.GetStringAsync(URL);
+            var httpres = await HttpHelper.GetStringAsync(URL);
             httpres = httpres.Substring(0, httpres.Length - 2).Substring(10);
             try
             {
@@ -30,9 +31,9 @@ namespace JPDictBackend.Helper
                 return new NHKRadioResult() { title = "该时段的录音尚未提供" };
             }
         }
-        public static int GetItemsCount()
+        public static async Task<int> GetItemsCount()
         {
-            var httpres = HttpHelper.GetStringAsync(URL);
+            var httpres = await HttpHelper.GetStringAsync(URL);
             httpres = httpres.Substring(0, httpres.Length - 2).Substring(10);
             try
             {

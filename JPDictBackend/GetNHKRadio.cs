@@ -7,13 +7,14 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.WebJobs.Host;
 using Newtonsoft.Json;
 using JPDictBackend.Helper;
+using System.Threading.Tasks;
 
 namespace JPDictBackend
 {
     public static class GetNHKRadio
     {
         [FunctionName("GetNHKRadio")]
-        public static IActionResult Run([HttpTrigger(AuthorizationLevel.Function, "get", Route = null)]HttpRequest req, TraceWriter log)
+        public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "get", Route = null)]HttpRequest req, TraceWriter log)
         {
             log.Info("C# HTTP trigger function processed a request.");
 
@@ -30,7 +31,7 @@ namespace JPDictBackend
                 if (bool.TryParse(getItemsCount, out bool g))
                 {
                     if (g)
-                        return new OkObjectResult(NHKRadioHelper.GetItemsCount());
+                        return new OkObjectResult(await NHKRadioHelper.GetItemsCount());
                 }
             }
             
@@ -39,7 +40,7 @@ namespace JPDictBackend
                 return new BadRequestObjectResult("Please specify a speed (normal, slow or fast)");
             }
             return (speed != null && index != null)
-                ? (ActionResult)new OkObjectResult(NHKRadioHelper.GetJson(speed, index))
+                ? (ActionResult)new OkObjectResult(await NHKRadioHelper.GetJson(speed, index))
                 : new BadRequestObjectResult("Please pass required parameters on the query string or in the request body");
         }
     }

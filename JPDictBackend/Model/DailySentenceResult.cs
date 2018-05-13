@@ -1,10 +1,11 @@
-﻿using System;
+﻿using Microsoft.WindowsAzure.Storage.Table;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace JPDictBackend.Model
 {
-    public class DailySentenceResult
+    public class DailySentenceResult : TableEntity
     {
         public string Sentence { get; set; }
 

@@ -8,13 +8,14 @@ using Microsoft.Azure.WebJobs.Host;
 using Newtonsoft.Json;
 using JPDictBackend.Helper;
 using System;
+using System.Threading.Tasks;
 
 namespace JPDictBackend
 {
     public static class GetDailySentence
     {
         [FunctionName("GetDailySentence")]
-        public static IActionResult Run([HttpTrigger(AuthorizationLevel.Function, "get", Route = null)]HttpRequest req, TraceWriter log)
+        public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "get", Route = null)]HttpRequest req, TraceWriter log)
         {
             log.Info("C# HTTP trigger function processed a request.");
 
@@ -29,7 +30,7 @@ namespace JPDictBackend
             }
             if(int.TryParse(index,out int i))
             {
-                return (ActionResult)new OkObjectResult(DailySentenceHelper.GetJson(DateTime.UtcNow.AddHours(8).AddDays(i - 2).ToString("yyyyMMdd")));
+                return (ActionResult)new OkObjectResult(await AzureStorageHelper.RetrieveData(DateTime.UtcNow.AddHours(8).AddDays(i - 2).AddYears(-3).ToString("yyyyMMdd")));
             }
             else
             {

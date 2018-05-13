@@ -5,20 +5,21 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace JPDictBackend.Helper
 {
     public static class DailySentenceHelper
     {
         const string URL = "http://portal.hjapi.com/v1/buluo/daily?langs=jp&publishDate=";
-        public static DailySentenceResult GetJson(string datestr)
+        public static async Task<DailySentenceResult> GetJson(string datestr)
         {
             string yearinstring = datestr.Substring(0, 4);
             string newdate = datestr.Substring(4);
             int year = int.Parse(yearinstring);
             year -= 5;
             newdate = year.ToString() + newdate;
-            var httpres = HttpHelper.GetStringAsync(URL + newdate);
+            var httpres = await HttpHelper.GetStringAsync(URL + newdate);
             try
             {
                 JToken jo = JObject.Parse(httpres)["data"];

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Xml.Linq;
 
 namespace JPDictBackend.Helper
@@ -12,11 +13,11 @@ namespace JPDictBackend.Helper
         const string URL1 = "http://www3.nhk.or.jp/news/html/toppage/xml/movlist.xml";
         //アクセスランキング
         const string URL2 = "http://www3.nhk.or.jp/news/html/toppage/xml/newlist.xml";
-        public static XElement GetXmlData()
+        public static async Task<XElement> GetXmlData()
         {
             //Get data from data source
-            XElement child1 = XmlHelper.LoadXmlFromString(HttpHelper.GetStringAsync(URL1));
-            XElement child2 = XmlHelper.LoadXmlFromString(HttpHelper.GetStringAsync(URL2));
+            XElement child1 = XmlHelper.LoadXmlFromString(await HttpHelper.GetStringAsync(URL1));
+            XElement child2 = XmlHelper.LoadXmlFromString(await HttpHelper.GetStringAsync(URL2));
             //将第二个新闻源的 item 加到第一个 XElement 上
             XmlHelper.AddChildFromOther(child1, child2.Elements("item"));
 

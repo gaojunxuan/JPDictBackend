@@ -2,18 +2,19 @@
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace JPDictBackend.Helper
 {
     public static class HttpHelper
     {
         static HttpClient httpClient;
-        public static string GetStringAsync(string uri)
+        public static async Task<string> GetStringAsync(string uri)
         {
             string response;
             using (httpClient = new HttpClient())
             {
-                response = httpClient.GetStringAsync(new Uri(uri)).Result;
+                response = await httpClient.GetStringAsync(new Uri(uri));
             }
             return response;
         }
