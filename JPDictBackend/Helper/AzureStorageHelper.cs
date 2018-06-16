@@ -14,13 +14,10 @@ namespace JPDictBackend.Helper
 {
     public static class AzureStorageHelper
     {        
-        public static async Task<DailySentenceResult> RetrieveData(string dateString)
+        public static async Task<DailySentenceResult> RetrieveData(string dateString,CloudTable table)
         {
-            string configstr = System.Environment.GetEnvironmentVariable("StorageConnectionString");
-            CloudStorageAccount storageAccount = CloudStorageAccount.Parse(configstr);
-            CloudTableClient tableClient = storageAccount.CreateCloudTableClient();
-            CloudTable table = tableClient.GetTableReference("DailySentence");
-            TableOperation retrieveOperation = TableOperation.Retrieve<DailySentenceResult>("DailySentence",dateString);
+            string yearstr = dateString.Substring(0, 4);
+            TableOperation retrieveOperation = TableOperation.Retrieve<DailySentenceResult>(yearstr,dateString);
             TableResult retrievedResult = await table.ExecuteAsync(retrieveOperation);
             if (retrievedResult.Result != null)
             {
