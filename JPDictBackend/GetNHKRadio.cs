@@ -8,20 +8,21 @@ using Microsoft.Azure.WebJobs.Host;
 using Newtonsoft.Json;
 using JPDictBackend.Helper;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace JPDictBackend
 {
     public static class GetNHKRadio
     {
         [FunctionName("GetNHKRadio")]
-        public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "get", Route = null)]HttpRequest req, TraceWriter log)
+        public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "get", Route = null)]HttpRequest req, ILogger log)
         {
-            log.Info("C# HTTP trigger function processed a request.");
+            log.LogInformation("GetNHKRadio: C# HTTP trigger function processed a request.");
 
             string speed = req.Query["speed"];
             string index = req.Query["index"];
             string getItemsCount = req.Query["getItemsCount"];
-            string requestBody = new StreamReader(req.Body).ReadToEnd();
+            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             dynamic data = JsonConvert.DeserializeObject(requestBody);
             speed = speed ?? data?.speed;
             index = index ?? data?.index;

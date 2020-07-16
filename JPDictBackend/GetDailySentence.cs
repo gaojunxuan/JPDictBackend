@@ -9,29 +9,42 @@ using Newtonsoft.Json;
 using JPDictBackend.Helper;
 using System;
 using System.Threading.Tasks;
-using Microsoft.WindowsAzure.Storage.Table;
+using Microsoft.Azure.WebJobs.Extensions.Storage;
+using Microsoft.Azure.WebJobs.Extensions;
+using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
+using JPDictBackend.Model;
+using Microsoft.Azure.Cosmos.Table;
 
 namespace JPDictBackend
 {
     public static class GetDailySentence
     {
         [FunctionName("GetDailySentence")]
-        public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "get", Route = null)]HttpRequest req, [Table("DailySentence")]CloudTable table, TraceWriter log)
+        public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "get", Route = null)]HttpRequest req, [Table("DailySentence")]CloudTable table, ILogger log)
         {
-            log.Info("C# HTTP trigger function processed a request.");
+            log.LogInformation("GetDailySentence: C# HTTP trigger function processed a request.");
 
             string index = req.Query["index"];
 
-            string requestBody = new StreamReader(req.Body).ReadToEnd();
+            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             dynamic data = JsonConvert.DeserializeObject(requestBody);
             index = index ?? data?.index;
-            if(index==null)
+            if(index == null || index == "")
             {
-                return new BadRequestObjectResult("Please pass required parameters on the query string or in the request body"); 
+                List<DailySentenceResult> results = new List<DailySentenceResult>();
+                Random rand = new Random(DateTime.Today.DayOfYear);
+                for(int j = 0; j < 5; j++)
+                {
+                    DailySentenceResult queryResult = await AzureStorageHelper.RetrieveEverydaySentenceData(rand.Next(0, 2522), table);
+                    if (queryResult != null)
+                        results.Add(queryResult);
+                }
+                return new OkObjectResult(results); 
             }
-            if(int.TryParse(index,out int i))
+            else if(int.TryParse(index,out int i))
             {
-                return (ActionResult)new OkObjectResult(await AzureStorageHelper.RetrieveData(DateTime.UtcNow.AddHours(8).AddDays(i - 2).AddYears(-3).ToString("yyyyMMdd"),table));
+                return new OkObjectResult(await AzureStorageHelper.RetrieveEverydaySentenceData(DateTime.UtcNow.AddHours(8).AddDays(i - 2).AddYears(-3).ToString("yyyyMMdd"),table));
             }
             else
             {

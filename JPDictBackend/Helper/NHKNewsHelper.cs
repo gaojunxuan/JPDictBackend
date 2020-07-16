@@ -15,18 +15,18 @@ namespace JPDictBackend.Helper
         const string URL2 = "http://www3.nhk.or.jp/news/html/toppage/xml/newlist.xml";
         public static async Task<XElement> GetXmlData()
         {
-            //Get data from data source
+            // Get data from data source
             XElement child1 = XmlHelper.LoadXmlFromString(await HttpHelper.GetStringAsync(URL1));
             XElement child2 = XmlHelper.LoadXmlFromString(await HttpHelper.GetStringAsync(URL2));
-            //将第二个新闻源的 item 加到第一个 XElement 上
+            // Append items from the second source to the first XElement
             XmlHelper.AddChildFromOther(child1, child2.Elements("item"));
 
             child1.Descendants("item").GroupBy(i => i.Element("title").Value).Where(g => g.Count() > 1).ToList().ForEach(x => x.Skip(1).Remove());
 
 
-            //获得所有 item 的集合
+            // Get a list of all items
             List<XElement> coll = child1.Elements("item").ToList();
-            //过滤没有 iconPath 的 item,删去
+            // Filter out items without an icon
             coll = XmlHelper.FilterItemInCollection(coll, (e) =>
             {
                 var title = e.Element("title").Value;
@@ -34,7 +34,7 @@ namespace JPDictBackend.Helper
                     return true;
                 else if (e.Element("iconPath").Value.StartsWith("news/r/") || e.Element("imgPath").Value.Contains("news/r/"))
                     return true;
-                //删除 JR 运营情报
+                // Remove JR information
                 else if (title.Contains("運転"))
                 {
                     if (title.Contains("見合") || title.Contains("再開"))
@@ -46,11 +46,11 @@ namespace JPDictBackend.Helper
                     return false;
             });
 
-            //随机取出 10 个 item
+            // Randomly pick 10 items
             coll = GetSomeItems(coll, 10);
-            //删除指定的 DOM 元素
+            // Remove unnecessary elements
             XmlHelper.DeleteElementByName(coll, "newFlg", "cate_group", "cate");
-            //如果节点不是一 http:// 开头则加上
+            // Complete the URL
             XmlHelper.FilterElementValueInCollection(coll, (e) =>
             {
                 if (e.Name == "videoPath")
