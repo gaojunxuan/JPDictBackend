@@ -25,11 +25,16 @@ namespace JPDictBackend
             dynamic data = JsonConvert.DeserializeObject(requestBody);
             keyword = keyword ?? data?.keyword;
 
-            var result = Helper.SqliteHelper.Query(keyword);
-
-            return keyword != null
-                ? (ActionResult)new OkObjectResult(result)
-                : new BadRequestObjectResult("Please pass a keyword on the query string or in the request body");
+            if(keyword != null)
+            {
+                var result = Helper.SqliteHelper.Query(keyword);
+                return (ActionResult)new OkObjectResult(result);
+            }
+            else
+            {
+                log.LogError("Error: Missing parameter(s) - \"keyword\" is empty");
+                return new BadRequestObjectResult("Pass a keyword to the query string or the request body");
+            }
         }
     }
 }

@@ -38,11 +38,12 @@ namespace JPDictBackend
             
             if (speed != "normal" && speed != "slow" && speed != "fast")
             {
-                return new BadRequestObjectResult("Please specify a speed (normal, slow or fast)");
+                log.LogError("Error: Missing parameter(s) - \"speed\"");
+                return new BadRequestObjectResult("Specify a speed (normal, slow or fast)");
             }
             return (speed != null && index != null)
                 ? (ActionResult)new OkObjectResult(await NHKRadioHelper.GetJson(speed, index))
-                : new BadRequestObjectResult("Please pass required parameters on the query string or in the request body");
+                : new BadRequestObjectResult("Pass required parameters to the query string or the request body");
         }
     }
 }

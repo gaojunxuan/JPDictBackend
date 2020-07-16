@@ -22,16 +22,19 @@ namespace JPDictBackend
         public static async Task<IActionResult> Run([HttpTrigger(AuthorizationLevel.Function, "get", Route = null)]HttpRequest req, ILogger log)
         {
             log.LogInformation("C# HTTP trigger function processed a request.");
-            string uri = req.Query["url"];
+            string url = req.Query["url"];
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             dynamic data = JsonConvert.DeserializeObject(requestBody);
-            uri = uri ?? data?.name;
-            if(uri!=null)
+            url = url ?? data?.url;
+            if(url!=null)
             {
-                if (!uri.Contains("www3.nhk.or.jp/news/html"))
-                    return new BadRequestObjectResult("The specific uri is not a valid NHK News uri");
+                if (!url.Contains("www3.nhk.or.jp/news/html"))
+                {
+                    log.LogError("Error: Invalid parameter(s) - specified URL is not a valid NHK News URL");
+                    return new BadRequestObjectResult("Specified URL is not a valid NHK News URL");
+                }
                 HttpClient client = new HttpClient();
-                var response = await client.GetAsync(uri);
+                var response = await client.GetAsync(url);
                 HtmlDocument html = new HtmlDocument();
                 html.LoadHtml(await response.Content.ReadAsStringAsync());
                 var title = html.DocumentNode.SelectSingleNode("//title").InnerText.Replace(" | NHKニュース", "");
@@ -80,8 +83,8 @@ namespace JPDictBackend
                 sb.AppendLine(addSb.ToString());
                 return (ActionResult)new OkObjectResult(new { Title = title, Content = sb.ToString().Replace("\r", "\n"), Image = img });
             }
-            
-            return new BadRequestObjectResult("Please pass a url on the query string or in the request body");
+            log.LogError("Error: Missing parameter(s) - \"url\" is empty");
+            return new BadRequestObjectResult("Pass a URL to the query string or the request body");
         }
     }
 }

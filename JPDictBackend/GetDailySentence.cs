@@ -48,7 +48,8 @@ namespace JPDictBackend
             }
             else
             {
-                return new BadRequestObjectResult("index should be an integer");
+                log.LogError("Error: Invalid parameter(s) - index should be an integer");
+                return new BadRequestObjectResult("Index should be an integer");
             }
 
         }
