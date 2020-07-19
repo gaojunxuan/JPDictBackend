@@ -21,21 +21,9 @@ namespace JPDictBackend
             log.LogInformation("GetNHKRadio: C# HTTP trigger function processed a request.");
 
             string speed = req.Query["speed"];
-            string index = req.Query["index"];
-            string getItemsCount = req.Query["getItemsCount"];
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             dynamic data = JsonConvert.DeserializeObject(requestBody);
             speed = speed ?? data?.speed;
-            index = index ?? data?.index;
-            getItemsCount = getItemsCount ?? data?.getItemsCount;
-            if (getItemsCount != null)
-            {
-                if (bool.TryParse(getItemsCount, out bool g))
-                {
-                    if (g)
-                        return new OkObjectResult(await NHKRadioHelper.GetItemsCount());
-                }
-            }
             
             if (speed != "normal" && speed != "slow" && speed != "fast")
             {
@@ -48,7 +36,7 @@ namespace JPDictBackend
             {
                 resultList.Add(await NHKRadioHelper.GetJson(speed, i));
             }
-            return (speed != null && index != null)
+            return (speed != null)
                 ? (ActionResult)new OkObjectResult(resultList)
                 : new BadRequestObjectResult("Pass required parameters to the query string or the request body");
         }
