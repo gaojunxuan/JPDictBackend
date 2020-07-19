@@ -1,4 +1,3 @@
-
 using System.IO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
@@ -9,6 +8,8 @@ using Newtonsoft.Json;
 using JPDictBackend.Helper;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using JPDictBackend.Model;
+using System.Collections.Generic;
 
 namespace JPDictBackend
 {
@@ -27,7 +28,7 @@ namespace JPDictBackend
             speed = speed ?? data?.speed;
             index = index ?? data?.index;
             getItemsCount = getItemsCount ?? data?.getItemsCount;
-            if(getItemsCount!=null)
+            if (getItemsCount != null)
             {
                 if (bool.TryParse(getItemsCount, out bool g))
                 {
@@ -41,8 +42,14 @@ namespace JPDictBackend
                 log.LogError("Error: Missing parameter(s) - \"speed\"");
                 return new BadRequestObjectResult("Specify a speed (normal, slow or fast)");
             }
+            List<NHKRadioResult> resultList = new List<NHKRadioResult>();
+            int count = await NHKRadioHelper.GetItemsCount();
+            for (int i = 0; i < count; i++)
+            {
+                resultList.Add(await NHKRadioHelper.GetJson(speed, i));
+            }
             return (speed != null && index != null)
-                ? (ActionResult)new OkObjectResult(await NHKRadioHelper.GetJson(speed, index))
+                ? (ActionResult)new OkObjectResult(resultList)
                 : new BadRequestObjectResult("Pass required parameters to the query string or the request body");
         }
     }

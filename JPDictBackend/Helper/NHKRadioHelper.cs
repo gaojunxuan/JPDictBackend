@@ -11,17 +11,14 @@ namespace JPDictBackend.Helper
     public static class NHKRadioHelper
     {
         const string URL = "http://www.nhk.or.jp/r-news/newslist.js";
-        public static async Task<NHKRadioResult> GetJson(string speed, string index)
-        {
-            bool cast = int.TryParse(index, out int i);
-            if (!cast)
-                i = 0;            
+        public static async Task<NHKRadioResult> GetJson(string speed, int index)
+        {      
             var httpres = await HttpHelper.GetStringAsync(URL);
             httpres = httpres.Substring(0, httpres.Length - 2).Substring(10);
             try
             {
                 JToken jo = JObject.Parse(httpres)["news"];
-                JToken newsitem = ((JArray)jo)[i];
+                JToken newsitem = ((JArray)jo)[index];
                 var jSetting = new JsonSerializerSettings();
                 jSetting.NullValueHandling = NullValueHandling.Ignore;
                 return new NHKRadioResult() { title = newsitem["title"].ToString(), startdate = newsitem["startdate"].ToString(), enddate = newsitem["enddate"].ToString(), soundurl = "http://www.nhk.or.jp/r-news/ondemand/mp3/" + newsitem["soundlist"]["sound_" + speed]["filename"].ToString() + ".mp3" };
