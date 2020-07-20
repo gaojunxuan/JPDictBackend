@@ -29,9 +29,9 @@ namespace JPDictBackend
             List<NHKEasyNews> result = new List<NHKEasyNews>();
             foreach(var j in jArray)
             {
-                string imgUri = new Uri((string)j["news_web_image_uri"]).AbsoluteUri;
+                string imgUri = j["news_web_image_uri"].ToString();
                 string newsId = (string)j["news_id"];
-                result.Add(new NHKEasyNews() { Title = (string)j["title"], NewsId = newsId, ImageUri = !string.IsNullOrWhiteSpace(imgUri) ? imgUri : $"https://www3.nhk.or.jp/news/easy/{newsId}/{newsId}.jpg" });
+                result.Add(new NHKEasyNews() { Title = (string)j["title"], NewsId = newsId, ImageUri = new Uri(!string.IsNullOrWhiteSpace(imgUri) ? imgUri : $"https://www3.nhk.or.jp/news/easy/{newsId}/{newsId}.jpg").AbsoluteUri });
             }
             return new OkObjectResult(result);
         }
